@@ -5,14 +5,10 @@ Step 3 the program calls the eBay API to check the price of the MTG card (using 
 then its up to you if you feel that the card worth your time to sell it on eBay
 (perhaps feed only uncommon, rare and gold cards - not common)
 """
-
-# import requests
 # import json
-
-"take a snapshot using your laptop camera"
-
-import cv2
 # import time
+import requests
+import cv2
 import datetime
 from pytesseract import pytesseract
 from PIL import Image
@@ -91,48 +87,45 @@ while True:
         # text = pytesseract.image_to_string(img_text)
 
         # Split the string into lines
-        # lines = img_text.split('\n')
+        lines = img_text.split('\n')
         # Print the first line
-        # print(lines[0], lines[1])
-        # print the whole text
-        print(img_text)
+        print(lines[0])
+        # or print the whole text
+        # print(img_text)
         # print(text.replace('\n', '').replace('\f', ''))
         # print(text[:-1])
+
+        # connect to eBay API
+        # Set the API endpoint URL and the API key to connect to eBay
+        endpoint_url = "https://api.ebay.com/buy/browse/v1/item_summary/search"
+        api_key = "IoannisG-findmtgc-SBX-45833820b-b3ad37f7"
+
+        # Set the search parameters
+        parameters = {
+            "q": lines[0],  # search for items with the keyword "iphone"
+            "limit": 10,  # retrieve up to 10 items
+            "sort": "currentPrice",  # sort the results by current price
+        }
+
+        # Set the headers for the API request
+        headers = {
+            "Authorization": f"Bearer {api_key}",  # include the API key in the authorization header
+            "Content-Type": "application/json",  # set the content type to JSON
+        }
+
+        # Send the API request and retrieve the response
+        response = requests.get(endpoint_url, params=parameters, headers=headers)
+
+        # Check the status code to see if the request was successful
+        if response.status_code == 200:
+            # If the request was successful, parse the JSON data
+            data = response.json()
+            # Iterate through the items in the response and print their prices
+            for item in data["itemSummaries"]:
+                print(f"Item: {item['title']}, Price:")
 
     if key == ord("q"):  # Press "q" to quit
         break
 
 camera.release()
 cv2.destroyAllWindows()
-
-'''
-# eBAY check price of MTG card
-
-# Set the API endpoint URL and the API key
-endpoint_url = "https://api.ebay.com/buy/browse/v1/item_summary/search"
-api_key = "YOUR_API_KEY_HERE"
-
-# Set the search parameters
-parameters = {
-    "q": text,  # search for items with the keyword "iphone"
-    "limit": 10,  # retrieve up to 10 items
-    "sort": "currentPrice",  # sort the results by current price
-}
-
-# Set the headers for the API request
-headers = {
-    "Authorization": f"Bearer {api_key}",  # include the API key in the authorization header
-    "Content-Type": "application/json",  # set the content type to JSON
-}
-
-# Send the API request and retrieve the response
-response = requests.get(endpoint_url, params=parameters, headers=headers)
-
-# Check the status code to see if the request was successful
-if response.status_code == 200:
-    # If the request was successful, parse the JSON data
-    data = response.json()
-    # Iterate through the items in the response and print their prices
-    for item in data["itemSummaries"]:
-        print(f"Item: {item['title']}, Price:")
-'''
